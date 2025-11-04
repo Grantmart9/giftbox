@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useBoxStore } from "@/store/boxStore";
 import { GiftItem } from "@/types";
+import GiftBox3D from "@/components/GiftBox3D";
 
 // Mock data for available items
 const mockItems: GiftItem[] = [
@@ -119,37 +120,15 @@ export default function BoxBuilderPage() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="aspect-square bg-gradient-to-br from-pink-200 via-purple-200 to-blue-200 rounded-xl flex items-center justify-center relative overflow-hidden mb-4">
-                <div
-                  className="w-24 h-24 rounded-lg shadow-lg transform hover:scale-105 transition-transform duration-300"
-                  style={{ backgroundColor: boxConfig.color }}
-                >
-                  <div className="w-full h-full rounded-lg bg-gradient-to-br from-white/30 to-transparent"></div>
-
-                  {/* Ribbon */}
-                  <div
-                    className="absolute top-1/2 left-0 right-0 h-1 transform -translate-y-1/2"
-                    style={{ backgroundColor: boxConfig.ribbonColor }}
-                  ></div>
-                  <div
-                    className="absolute top-0 bottom-0 left-1/2 w-1 transform -translate-x-1/2"
-                    style={{ backgroundColor: boxConfig.ribbonColor }}
-                  ></div>
-                </div>
-
-                {is3DPreview && (
-                  <motion.div
-                    animate={{ rotate: 360 }}
-                    transition={{
-                      duration: 4,
-                      repeat: Infinity,
-                      ease: "linear",
-                    }}
-                    className="absolute inset-0 flex items-center justify-center"
-                  >
-                    <span className="text-4xl opacity-20">🎁</span>
-                  </motion.div>
-                )}
+              <div className="aspect-square bg-gradient-to-br from-pink-200 via-purple-200 to-blue-200 rounded-xl overflow-hidden mb-4 relative">
+                <GiftBox3D
+                  color={boxConfig.color}
+                  ribbonColor={boxConfig.ribbonColor}
+                  size={boxConfig.size}
+                  bowStyle={boxConfig.bowStyle}
+                  isAnimating={is3DPreview}
+                  showItems={boxConfig.items.length > 0}
+                />
               </div>
 
               <div className="text-center space-y-3">
@@ -169,163 +148,19 @@ export default function BoxBuilderPage() {
                     {boxConfig.items.length !== 1 ? "s" : ""})
                   </p>
 
-                  {/* Mobile Box Size Selection */}
-                  <div className="mb-4">
-                    <label className="block text-sm font-medium mb-2">
-                      Box Size
-                    </label>
-                    <div className="grid grid-cols-2 gap-2">
-                      {[
-                        { key: "small", label: "Small", price: 0 },
-                        { key: "medium", label: "Medium", price: 86.65 },
-                        { key: "large", label: "Large", price: 173.3 },
-                        { key: "extra-large", label: "XL", price: 259.95 },
-                      ].map((size) => (
-                        <button
-                          key={size.key}
-                          className={`p-2 rounded-lg border text-xs transition-colors ${
-                            boxConfig.size === size.key
-                              ? "border-pink-500 bg-pink-50"
-                              : "border-gray-300 hover:border-gray-400"
-                          }`}
-                          onClick={() =>
-                            useBoxStore
-                              .getState()
-                              .setBoxConfig({ size: size.key as any })
-                          }
-                        >
-                          <div className="font-medium">{size.label}</div>
-                          <div className="text-xs text-pink-600">
-                            {size.price === 0 ? "Free" : `+R${size.price}`}
-                          </div>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
                   <Button
                     size="sm"
                     className="w-full bg-gradient-to-r from-pink-500 to-purple-600"
                     disabled={boxConfig.items.length === 0}
+                    onClick={() => (window.location.href = "/checkout")}
                   >
                     Proceed to Checkout
                   </Button>
                 </div>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium mb-2">
-                  Box Size
-                </label>
-                <div className="grid grid-cols-2 gap-2">
-                  {[
-                    {
-                      key: "small",
-                      label: "Small",
-                      dimensions: '6" x 4" x 3"',
-                      price: 0,
-                    },
-                    {
-                      key: "medium",
-                      label: "Medium",
-                      dimensions: '8" x 6" x 4"',
-                      price: 86.65,
-                    },
-                    {
-                      key: "large",
-                      label: "Large",
-                      dimensions: '10" x 8" x 5"',
-                      price: 173.3,
-                    },
-                    {
-                      key: "extra-large",
-                      label: "Extra Large",
-                      dimensions: '12" x 10" x 6"',
-                      price: 259.95,
-                    },
-                  ].map((size) => (
-                    <button
-                      key={size.key}
-                      className={`p-3 rounded-lg border-2 text-left transition-colors ${
-                        boxConfig.size === size.key
-                          ? "border-pink-500 bg-pink-50"
-                          : "border-gray-300 hover:border-gray-400"
-                      }`}
-                      onClick={() =>
-                        useBoxStore
-                          .getState()
-                          .setBoxConfig({ size: size.key as any })
-                      }
-                    >
-                      <div className="font-medium text-sm">{size.label}</div>
-                      <div className="text-xs text-gray-600">
-                        {size.dimensions}
-                      </div>
-                      <div className="text-xs font-medium text-pink-600">
-                        {size.price === 0 ? "Free" : `+R${size.price}`}
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-2">
-                  Box Size
-                </label>
-                <div className="grid grid-cols-2 gap-2">
-                  {[
-                    {
-                      key: "small",
-                      label: "Small",
-                      dimensions: '6" x 4" x 3"',
-                      price: 0,
-                    },
-                    {
-                      key: "medium",
-                      label: "Medium",
-                      dimensions: '8" x 6" x 4"',
-                      price: 86.65,
-                    },
-                    {
-                      key: "large",
-                      label: "Large",
-                      dimensions: '10" x 8" x 5"',
-                      price: 173.3,
-                    },
-                    {
-                      key: "extra-large",
-                      label: "Extra Large",
-                      dimensions: '12" x 10" x 6"',
-                      price: 259.95,
-                    },
-                  ].map((size) => (
-                    <button
-                      key={size.key}
-                      className={`p-3 rounded-lg border-2 text-left transition-colors ${
-                        boxConfig.size === size.key
-                          ? "border-pink-500 bg-pink-50"
-                          : "border-gray-300 hover:border-gray-400"
-                      }`}
-                      onClick={() =>
-                        useBoxStore
-                          .getState()
-                          .setBoxConfig({ size: size.key as any })
-                      }
-                    >
-                      <div className="font-medium text-sm">{size.label}</div>
-                      <div className="text-xs text-gray-600">
-                        {size.dimensions}
-                      </div>
-                      <div className="text-xs font-medium text-pink-600">
-                        {size.price === 0 ? "Free" : `+R${size.price}`}
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div>
+              {/* Box Size Selection */}
+              <div className="mb-4">
                 <label className="block text-sm font-medium mb-2">
                   Box Size
                 </label>
@@ -477,38 +312,15 @@ export default function BoxBuilderPage() {
                 <CardTitle className="text-center">Your Gift Box</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="aspect-square bg-gradient-to-br from-pink-200 via-purple-200 to-blue-200 rounded-xl flex items-center justify-center relative overflow-hidden">
-                  <div
-                    className="w-32 h-32 rounded-lg shadow-lg transform hover:scale-105 transition-transform duration-300"
-                    style={{ backgroundColor: boxConfig.color }}
-                  >
-                    {/* Box representation */}
-                    <div className="w-full h-full rounded-lg bg-gradient-to-br from-white/30 to-transparent"></div>
-
-                    {/* Ribbon */}
-                    <div
-                      className="absolute top-1/2 left-0 right-0 h-2 transform -translate-y-1/2"
-                      style={{ backgroundColor: boxConfig.ribbonColor }}
-                    ></div>
-                    <div
-                      className="absolute top-0 bottom-0 left-1/2 w-2 transform -translate-x-1/2"
-                      style={{ backgroundColor: boxConfig.ribbonColor }}
-                    ></div>
-                  </div>
-
-                  {is3DPreview && (
-                    <motion.div
-                      animate={{ rotate: 360 }}
-                      transition={{
-                        duration: 4,
-                        repeat: Infinity,
-                        ease: "linear",
-                      }}
-                      className="absolute inset-0 flex items-center justify-center"
-                    >
-                      <span className="text-6xl opacity-20">🎁</span>
-                    </motion.div>
-                  )}
+                <div className="aspect-square bg-gradient-to-br from-pink-200 via-purple-200 to-blue-200 rounded-xl overflow-hidden relative">
+                  <GiftBox3D
+                    color={boxConfig.color}
+                    ribbonColor={boxConfig.ribbonColor}
+                    size={boxConfig.size}
+                    bowStyle={boxConfig.bowStyle}
+                    isAnimating={is3DPreview}
+                    showItems={boxConfig.items.length > 0}
+                  />
                 </div>
 
                 <div className="mt-4 text-center">
@@ -585,6 +397,72 @@ export default function BoxBuilderPage() {
                             .setBoxConfig({ ribbonColor: color })
                         }
                       />
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-2">
+                    Bow Style
+                  </label>
+                  <div className="grid grid-cols-1 gap-2">
+                    {[
+                      {
+                        key: "classic",
+                        label: "Classic",
+                        icon: "🎀",
+                        description: "Traditional bow with loops and tails",
+                      },
+                      {
+                        key: "elegant",
+                        label: "Elegant",
+                        icon: "✨",
+                        description: "Sophisticated single-loop design",
+                      },
+                      {
+                        key: "playful",
+                        label: "Playful",
+                        icon: "🎈",
+                        description: "Fun, bouncy bow style",
+                      },
+                      {
+                        key: "luxury",
+                        label: "Luxury",
+                        icon: "💎",
+                        description: "Premium ornate bow design",
+                      },
+                      {
+                        key: "minimalist",
+                        label: "Minimalist",
+                        icon: "➰",
+                        description: "Clean, simple ribbon accent",
+                      },
+                    ].map((bow) => (
+                      <button
+                        key={bow.key}
+                        className={`p-3 rounded-lg border-2 text-left transition-colors ${
+                          boxConfig.bowStyle === bow.key
+                            ? "border-pink-500 bg-pink-50"
+                            : "border-gray-300 hover:border-gray-400"
+                        }`}
+                        onClick={() =>
+                          useBoxStore
+                            .getState()
+                            .setBoxConfig({ bowStyle: bow.key as any })
+                        }
+                      >
+                        <div className="flex items-center space-x-2">
+                          <span className="text-lg">{bow.icon}</span>
+                          <div className="flex-1">
+                            <div className="font-medium text-sm">
+                              {bow.label}
+                            </div>
+                            <div className="text-xs text-gray-600">
+                              {bow.description}
+                            </div>
+                          </div>
+                        </div>
+                      </button>
                     ))}
                   </div>
                 </div>
@@ -696,6 +574,7 @@ export default function BoxBuilderPage() {
                   variant="secondary"
                   className="w-full mb-2 text-sm lg:text-base"
                   disabled={boxConfig.items.length === 0}
+                  onClick={() => (window.location.href = "/checkout")}
                 >
                   Proceed to Checkout
                 </Button>

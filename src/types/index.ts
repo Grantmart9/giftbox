@@ -18,10 +18,39 @@ export interface BoxConfiguration {
   wrappingStyle: string;
   ribbonColor: string;
   size: "small" | "medium" | "large" | "extra-large";
+  bowStyle: "classic" | "elegant" | "playful" | "luxury" | "minimalist";
   items: GiftItem[];
   totalPrice: number;
   userId?: string;
 }
+
+export const BOW_STYLES = {
+  classic: {
+    label: "Classic",
+    description: "Traditional bow with loops and tails",
+    icon: "🎀",
+  },
+  elegant: {
+    label: "Elegant",
+    description: "Sophisticated single-loop design",
+    icon: "✨",
+  },
+  playful: {
+    label: "Playful",
+    description: "Fun, bouncy bow style",
+    icon: "🎈",
+  },
+  luxury: {
+    label: "Luxury",
+    description: "Premium ornate bow design",
+    icon: "💎",
+  },
+  minimalist: {
+    label: "Minimalist",
+    description: "Clean, simple ribbon accent",
+    icon: "➰",
+  },
+} as const;
 
 export const BOX_SIZES = {
   small: { label: "Small", dimensions: '6" x 4" x 3"', price: 0 },

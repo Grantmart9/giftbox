@@ -10,6 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import GiftBox3D from "@/components/GiftBox3D";
 
 export default function HomePage() {
   return (
@@ -58,13 +59,17 @@ export default function HomePage() {
               transition={{ duration: 1, delay: 0.2 }}
               className="relative"
             >
-              <div className="w-full h-96 rounded-2xl bg-white/20 backdrop-blur-sm border border-white/30 shadow-2xl flex items-center justify-center">
-                <div className="text-center">
-                  <div className="w-48 h-48 mx-auto mb-4 rounded-xl bg-gradient-to-br from-pink-400 via-purple-500 to-blue-500 shadow-lg transform rotate-3 hover:rotate-6 transition-transform duration-300"></div>
-                  <p className="text-gray-600 text-lg font-medium">
-                    Interactive 3D Preview
-                  </p>
-                  <p className="text-gray-500 text-sm">Coming Soon</p>
+              <div className="w-full h-96 rounded-2xl bg-white/20 backdrop-blur-sm border border-white/30 shadow-2xl overflow-hidden">
+                <GiftBox3D
+                  color="#ff6b9d"
+                  ribbonColor="#ffd700"
+                  size="medium"
+                  bowStyle="classic"
+                  isAnimating={true}
+                  showItems={true}
+                />
+                <div className="absolute bottom-4 left-4 text-white/80 text-sm font-medium bg-black/30 backdrop-blur-sm rounded-lg px-3 py-2">
+                  🎮 Interactive 3D Preview - Drag to explore!
                 </div>
               </div>
             </motion.div>
@@ -95,13 +100,19 @@ export default function HomePage() {
             </p>
           </motion.div>
 
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
             {[
               {
                 title: "Interactive 3D Builder",
                 description:
                   "Design your box in real-time with our advanced 3D visualization tool.",
                 icon: "🎨",
+              },
+              {
+                title: "Customizable Bows",
+                description:
+                  "Choose from 5 unique bow styles - from classic to luxury designs.",
+                icon: "🎀",
               },
               {
                 title: "Premium Items",

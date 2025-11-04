@@ -94,12 +94,13 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 
 3. **Setup Supabase Database**
 
-```bash
-# In your Supabase dashboard:
-# 1. Create a new project
-# 2. Run the SQL from supabase-schema.sql in the SQL editor
-# 3. Note your project URL and anon key
-```
+For detailed instructions, see [AUTH_SETUP.md](./AUTH_SETUP.md) which includes:
+
+- Creating a Supabase project
+- Getting your API credentials
+- Setting up the database schema with Row Level Security
+- Configuring authentication settings
+- Testing the setup
 
 4. **Start development server**
 

@@ -32,6 +32,7 @@ const initialBoxConfig: BoxConfiguration = {
   wrappingStyle: "solid",
   ribbonColor: "#ffd700",
   size: "medium",
+  bowStyle: "classic",
   items: [],
   totalPrice: 0,
 };
