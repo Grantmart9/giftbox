@@ -5,6 +5,8 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useBoxStore } from "@/store/boxStore";
+import { useToast } from "@/components/ui/toast";
+import Loading from "@/components/ui/loading";
 import { GiftItem } from "@/types";
 import GiftBox3D from "@/components/GiftBox3D";
 
@@ -73,11 +75,102 @@ export default function BoxBuilderPage() {
     setAvailableItems,
   } = useBoxStore();
 
+  const { addToast } = useToast();
   const [availableItems, setLocalItems] = useState<GiftItem[]>(mockItems);
+  const [isLoading, setIsLoading] = useState(false);
+  const [animatingItems, setAnimatingItems] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     setAvailableItems(mockItems);
   }, [setAvailableItems]);
+
+  // Enhanced item management with better UX
+  const handleAddItem = async (item: GiftItem) => {
+    setIsLoading(true);
+    setAnimatingItems((prev) => new Set(prev).add(item.id));
+
+    // Simulate loading for better UX
+    await new Promise((resolve) => setTimeout(resolve, 300));
+
+    addItemToBox(item);
+    setIsLoading(false);
+
+    addToast({
+      type: "success",
+      title: "Item Added! 🎉",
+      message: `${item.name} has been added to your box`,
+      duration: 3000,
+    });
+
+    // Remove animation after delay
+    setTimeout(() => {
+      setAnimatingItems((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(item.id);
+        return newSet;
+      });
+    }, 600);
+  };
+
+  const handleRemoveItem = async (itemId: string) => {
+    const item = boxConfig.items.find((i) => i.id === itemId);
+    if (item) {
+      setIsLoading(true);
+
+      await new Promise((resolve) => setTimeout(resolve, 200));
+
+      removeItemFromBox(itemId);
+      setIsLoading(false);
+
+      addToast({
+        type: "info",
+        title: "Item Removed",
+        message: `${item.name} has been removed from your box`,
+        duration: 2500,
+      });
+    }
+  };
+
+  const handleClearBox = async () => {
+    if (boxConfig.items.length === 0) return;
+
+    setIsLoading(true);
+
+    await new Promise((resolve) => setTimeout(resolve, 300));
+
+    clearBox();
+    setIsLoading(false);
+
+    addToast({
+      type: "warning",
+      title: "Box Cleared",
+      message: "All items have been removed from your box",
+      duration: 3000,
+    });
+  };
+
+  const handleCheckout = () => {
+    if (boxConfig.items.length === 0) {
+      addToast({
+        type: "warning",
+        title: "Empty Box",
+        message: "Please add some items before proceeding to checkout",
+        duration: 4000,
+      });
+      return;
+    }
+
+    addToast({
+      type: "info",
+      title: "Redirecting to Checkout",
+      message: "Preparing your order...",
+      duration: 2000,
+    });
+
+    setTimeout(() => {
+      window.location.href = "/checkout";
+    }, 500);
+  };
 
   const filteredItems =
     selectedCategory === "All"
@@ -95,25 +188,64 @@ export default function BoxBuilderPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50">
-      <div className="container mx-auto px-4 py-6 lg:py-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative">
+      {/* Animated background elements */}
+      <div className="absolute inset-0">
+        <div className="absolute top-10 right-10 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-20 left-20 w-80 h-80 bg-purple-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-pink-500/10 rounded-full blur-3xl animate-pulse delay-2000"></div>
+      </div>
+      <div className="container mx-auto px-4 py-6 lg:py-8 relative z-10">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-6 lg:mb-8"
         >
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold bg-gradient-to-r from-pink-600 via-purple-600 to-blue-600 bg-clip-text text-transparent mb-2 lg:mb-4">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold text-gradient mb-2 lg:mb-4">
             Build Your Perfect Gift Box
           </h1>
-          <p className="text-sm sm:text-lg lg:text-xl text-gray-600 px-4">
+          <p className="text-sm sm:text-lg lg:text-xl text-gray-300 px-4 mb-4">
             Choose items to create your personalized gift experience
           </p>
+
+          {/* Progress Indicator */}
+          {boxConfig.items.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="card-glass rounded-xl px-4 py-2 inline-block shadow-lg border border-white/20"
+            >
+              <div className="flex items-center space-x-3">
+                <span className="text-sm font-medium text-white">
+                  Box Progress:
+                </span>
+                <div className="flex items-center space-x-2">
+                  <div className="w-24 progress-modern rounded-full h-2">
+                    <motion.div
+                      className="progress-bar h-2 rounded-full"
+                      initial={{ width: 0 }}
+                      animate={{
+                        width: `${Math.min(
+                          (boxConfig.items.length / 6) * 100,
+                          100
+                        )}%`,
+                      }}
+                      transition={{ duration: 0.8, delay: 0.2 }}
+                    />
+                  </div>
+                  <span className="text-xs text-gray-300">
+                    {boxConfig.items.length}/6 items
+                  </span>
+                </div>
+              </div>
+            </motion.div>
+          )}
         </motion.div>
 
         {/* Mobile 3D Preview */}
         <div className="block lg:hidden mb-6">
-          <Card className="bg-white/60 backdrop-blur-sm border-0 shadow-lg">
+          <Card className="card-glass border-0 shadow-2xl">
             <CardHeader className="pb-3">
               <CardTitle className="text-center text-lg">
                 Your Gift Box
@@ -151,10 +283,10 @@ export default function BoxBuilderPage() {
                   <Button
                     size="sm"
                     className="w-full bg-gradient-to-r from-pink-500 to-purple-600"
-                    disabled={boxConfig.items.length === 0}
-                    onClick={() => (window.location.href = "/checkout")}
+                    disabled={boxConfig.items.length === 0 || isLoading}
+                    onClick={handleCheckout}
                   >
-                    Proceed to Checkout
+                    {isLoading ? "Processing..." : "Proceed to Checkout"}
                   </Button>
                 </div>
               </div>
@@ -226,17 +358,20 @@ export default function BoxBuilderPage() {
             animate={{ opacity: 1, x: 0 }}
             className="lg:col-span-2 order-2 lg:order-1"
           >
-            <Card className="bg-white/60 backdrop-blur-sm border-0 shadow-lg">
+            <Card className="card-glass border-0 shadow-2xl">
               <CardHeader className="pb-4">
                 <CardTitle className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
-                  <span className="text-lg lg:text-xl">Available Items</span>
+                  <span className="text-lg lg:text-xl text-white">
+                    Available Items
+                  </span>
                   <Button
                     variant="outline"
-                    onClick={clearBox}
+                    onClick={handleClearBox}
+                    disabled={boxConfig.items.length === 0 || isLoading}
                     size="sm"
                     className="w-full sm:w-auto"
                   >
-                    Clear Box
+                    {isLoading ? "Clearing..." : "Clear Box"}
                   </Button>
                 </CardTitle>
               </CardHeader>
@@ -259,14 +394,17 @@ export default function BoxBuilderPage() {
                 </div>
 
                 {/* Items Grid */}
-                <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 lg:gap-4">
+                <div
+                  data-tour="items-grid"
+                  className="grid grid-cols-2 lg:grid-cols-3 gap-3 lg:gap-4"
+                >
                   {filteredItems.map((item) => (
                     <motion.div
                       key={item.id}
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                     >
-                      <Card className="cursor-pointer hover:shadow-lg transition-shadow duration-300 border-0 bg-white/80">
+                      <Card className="cursor-pointer card-hover border-0 bg-white/20 backdrop-blur-md">
                         <div className="aspect-square bg-gradient-to-br from-gray-100 to-gray-200 rounded-t-lg flex items-center justify-center">
                           <span className="text-2xl sm:text-3xl lg:text-4xl">
                             📦
@@ -285,10 +423,15 @@ export default function BoxBuilderPage() {
                             </span>
                             <Button
                               size="sm"
-                              onClick={() => addItemToBox(item)}
+                              onClick={() => handleAddItem(item)}
+                              disabled={
+                                isLoading || animatingItems.has(item.id)
+                              }
                               className="text-xs px-2 py-1 h-7 sm:h-8 bg-gradient-to-r from-pink-500 to-purple-600"
                             >
-                              Add
+                              {animatingItems.has(item.id)
+                                ? "Adding..."
+                                : "Add"}
                             </Button>
                           </div>
                         </CardContent>
@@ -307,7 +450,10 @@ export default function BoxBuilderPage() {
             className="space-y-4 lg:space-y-6 order-1 lg:order-2 hidden lg:block"
           >
             {/* 3D Box Preview */}
-            <Card className="bg-white/60 backdrop-blur-sm border-0 shadow-lg">
+            <Card
+              data-tour="3d-preview"
+              className="bg-white/60 backdrop-blur-sm border-0 shadow-lg"
+            >
               <CardHeader>
                 <CardTitle className="text-center">Your Gift Box</CardTitle>
               </CardHeader>
@@ -336,7 +482,10 @@ export default function BoxBuilderPage() {
             </Card>
 
             {/* Box Configuration */}
-            <Card className="bg-white/60 backdrop-blur-sm border-0 shadow-lg">
+            <Card
+              data-tour="customization-panel"
+              className="bg-white/60 backdrop-blur-sm border-0 shadow-lg"
+            >
               <CardHeader>
                 <CardTitle>Customize Box</CardTitle>
               </CardHeader>
@@ -526,7 +675,7 @@ export default function BoxBuilderPage() {
             </Card>
 
             {/* Current Items */}
-            <Card className="bg-white/60 backdrop-blur-sm border-0 shadow-lg">
+            <Card className="card-glass border-0 shadow-2xl">
               <CardHeader>
                 <CardTitle>Box Contents ({boxConfig.items.length})</CardTitle>
               </CardHeader>
@@ -551,7 +700,8 @@ export default function BoxBuilderPage() {
                         <Button
                           size="sm"
                           variant="destructive"
-                          onClick={() => removeItemFromBox(item.id)}
+                          onClick={() => handleRemoveItem(item.id)}
+                          disabled={isLoading}
                           className="h-6 px-2 text-xs"
                         >
                           Remove
@@ -573,10 +723,10 @@ export default function BoxBuilderPage() {
                   size="lg"
                   variant="secondary"
                   className="w-full mb-2 text-sm lg:text-base"
-                  disabled={boxConfig.items.length === 0}
-                  onClick={() => (window.location.href = "/checkout")}
+                  disabled={boxConfig.items.length === 0 || isLoading}
+                  onClick={handleCheckout}
                 >
-                  Proceed to Checkout
+                  {isLoading ? "Processing..." : "Proceed to Checkout"}
                 </Button>
                 <p className="text-xs lg:text-sm opacity-90">
                   {boxConfig.items.length} item
